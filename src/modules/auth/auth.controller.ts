@@ -18,7 +18,7 @@ import { Response } from 'express';
 
 import { UserId } from '../common/user-id.decorator';
 import { UserResponseDto } from '../users/dto/user-response.dto';
-import { AuthService } from './auth.service';
+
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LogoutResponseDto } from './dto/logout-response.dto';
@@ -27,6 +27,7 @@ import { RegisterRequestDto } from './dto/register-request.dto';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { ReqWithCookie } from './types/req-with-cookie.type';
 import { getRefreshTokenExpiration } from './utils/get-refresh-token-expiration';
+import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
 @Controller('auth')

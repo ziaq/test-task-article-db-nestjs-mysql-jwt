@@ -8,6 +8,7 @@ import {
 
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { UserId } from '../common/user-id.decorator';
+
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersService } from './users.service';
 

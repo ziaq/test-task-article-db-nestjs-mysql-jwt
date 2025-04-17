@@ -9,6 +9,8 @@ import { Config } from '../../config/config.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
+import { mapToUserResponseDto } from '../users/utils/map-to-user-response-dto';
+
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { RefreshSession } from './entities/refresh-session.entity';
 import { getRefreshTokenExpiration } from './utils/get-refresh-token-expiration';
