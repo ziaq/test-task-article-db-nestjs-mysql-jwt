@@ -6,10 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { ArticleResponseDto } from './dto/article-response.dto';
 import { CreateArticleRequestDto } from './dto/create-article-request.dto';
 import { GetArticlesRequestQueryDto } from './dto/get-articles-request-query.dto';
-import { GetArticlesResponseDto } from './dto/get-articles-response.dto';
 import { UpdateArticleRequestDto } from './dto/update-article-request.dto';
 import { Article } from './entities/article.entity';
 import { ArticleUpdateLog } from './entities/article-update-log.entity';
@@ -24,7 +22,7 @@ export class ArticlesService {
     private updateLogRepo: Repository<ArticleUpdateLog>,
   ) {}
 
-  async findById(id: number, userId?: number): Promise<ArticleResponseDto> {
+  async findById(id: number, userId?: number): Promise<Article> {
     const article = await this.articleRepo.findOne({ where: { id } });
 
     if (!article) throw new NotFoundException('Article not found');
@@ -39,7 +37,7 @@ export class ArticlesService {
   async findAll(
     query: GetArticlesRequestQueryDto,
     userId?: number,
-  ): Promise<GetArticlesResponseDto> {
+  ): Promise<Article[]> {
     const { sort, offset, limit } = query;
 
     const whereCondition = userId ? {} : { isPublic: true };
@@ -52,10 +50,7 @@ export class ArticlesService {
     });
   }
 
-  async create(
-    userId: number,
-    dto: CreateArticleRequestDto,
-  ): Promise<ArticleResponseDto> {
+  async create(userId: number, dto: CreateArticleRequestDto): Promise<Article> {
     const article = this.articleRepo.create({
       title: dto.title,
       content: dto.content,
@@ -71,7 +66,7 @@ export class ArticlesService {
     userId: number,
     id: number,
     dto: UpdateArticleRequestDto,
-  ): Promise<ArticleResponseDto> {
+  ): Promise<Article> {
     const article = await this.articleRepo.findOne({ where: { id } });
     if (!article) throw new NotFoundException('Article not found');
 
@@ -80,14 +75,14 @@ export class ArticlesService {
     if (dto.tags !== undefined) article.tags = dto.tags ?? [];
     if (dto.isPublic !== undefined) article.isPublic = dto.isPublic;
 
-    const updated = await this.articleRepo.save(article);
+    const updatedArticle = await this.articleRepo.save(article);
 
     await this.updateLogRepo.save({
       article: { id },
       updatedBy: { id: userId },
     });
 
-    return updated;
+    return updatedArticle;
   }
 
   async delete(id: number): Promise<void> {

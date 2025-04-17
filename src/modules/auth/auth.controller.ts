@@ -15,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ZodSerializerDto } from 'nestjs-zod';
 
 import { UserId } from '../common/user-id.decorator';
 import { UserResponseDto } from '../users/dto/user-response.dto';
@@ -39,8 +40,9 @@ export class AuthController {
   })
   @ApiBody({ type: RegisterRequestDto })
   @ApiResponse({ status: 201, type: UserResponseDto })
+  @ZodSerializerDto(UserResponseDto)
   @Post('register')
-  async register(@Body() body: RegisterRequestDto): Promise<UserResponseDto> {
+  register(@Body() body: RegisterRequestDto): Promise<UserResponseDto> {
     return this.authService.registerUser(body);
   }
 
@@ -49,6 +51,7 @@ export class AuthController {
   })
   @ApiBody({ type: LoginRequestDto })
   @ApiResponse({ type: AccessTokenResponseDto })
+  @ZodSerializerDto(AccessTokenResponseDto)
   @Post('login')
   async login(
     @Body() body: LoginRequestDto,
@@ -56,8 +59,12 @@ export class AuthController {
   ): Promise<AccessTokenResponseDto> {
     const { email, password, fingerprint } = body;
 
-    const userWithPassword = await this.authService.validateUser(email, password);
-    if (!userWithPassword) throw new UnauthorizedException('Invalid credentials');
+    const userWithPassword = await this.authService.validateUser(
+      email,
+      password,
+    );
+    if (!userWithPassword)
+      throw new UnauthorizedException('Invalid credentials');
 
     const { accessToken, refreshToken } = await this.authService.generateTokens(
       userWithPassword.id,
@@ -81,6 +88,7 @@ export class AuthController {
   })
   @ApiResponse({ type: LogoutResponseDto })
   @UseGuards(RefreshTokenGuard)
+  @ZodSerializerDto(LogoutResponseDto)
   @Post('logout')
   async logout(
     @UserId() userId: number,
@@ -110,6 +118,7 @@ export class AuthController {
   @ApiBody({ type: RefreshTokenRequestDto })
   @ApiResponse({ type: AccessTokenResponseDto })
   @UseGuards(RefreshTokenGuard)
+  @ZodSerializerDto(AccessTokenResponseDto)
   @Post('refresh')
   async refresh(
     @UserId() userId: number,

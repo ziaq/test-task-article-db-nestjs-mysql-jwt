@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { ZodSerializerDto } from 'nestjs-zod';
 
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { UserId } from '../common/user-id.decorator';
@@ -46,6 +47,7 @@ export class ArticlesController {
   @ApiQuery({ name: 'offset', required: true, type: Number })
   @ApiQuery({ name: 'sort', required: true, enum: ['ASC', 'DESC'] })
   @ApiResponse({ type: GetArticlesResponseDto, isArray: true })
+  @ZodSerializerDto(GetArticlesResponseDto)
   @Get()
   getAll(
     @Query() query: GetArticlesRequestQueryDto,
@@ -62,6 +64,7 @@ export class ArticlesController {
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ type: ArticleResponseDto })
+  @ZodSerializerDto(ArticleResponseDto)
   @Get(':id')
   getById(
     @Param() { id }: ArticleIdParamDto,
@@ -77,6 +80,7 @@ export class ArticlesController {
   @ApiBody({ type: CreateArticleRequestDto })
   @ApiResponse({ type: ArticleResponseDto, status: 201 })
   @UseGuards(AccessTokenGuard)
+  @ZodSerializerDto(ArticleResponseDto)
   @Post()
   create(
     @UserId() userId: number,
@@ -93,6 +97,7 @@ export class ArticlesController {
   @ApiBody({ type: UpdateArticleRequestDto })
   @ApiResponse({ type: ArticleResponseDto })
   @UseGuards(AccessTokenGuard)
+  @ZodSerializerDto(ArticleResponseDto)
   @Patch(':id')
   update(
     @UserId() userId: number,

@@ -16,16 +16,4 @@ export class User {
 
   @Column()
   lastName: string;
-
-  @Column({ nullable: true })
-  phone: string;
-
-  @Column({ nullable: true })
-  birthDate: Date;
-
-  @Column({ nullable: true })
-  about: string;
-
-  @Column({ nullable: true })
-  avatar: string;
 }

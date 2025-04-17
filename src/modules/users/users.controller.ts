@@ -5,6 +5,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { ZodSerializerDto } from 'nestjs-zod';
 
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { UserId } from '../common/user-id.decorator';
@@ -23,6 +24,7 @@ export class UsersController {
     summary: 'Получение данных пользователя на основе его access токена',
   })
   @ApiResponse({ type: UserResponseDto })
+  @ZodSerializerDto(UserResponseDto)
   @Get('my-profile')
   getProfile(@UserId() userId: number) {
     return this.usersService.getUserById(userId);
