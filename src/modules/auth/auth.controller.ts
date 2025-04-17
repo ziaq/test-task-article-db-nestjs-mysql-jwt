@@ -19,6 +19,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 
 import { UserId } from '../common/user-id.decorator';
 import { UserResponseDto } from '../users/dto/user-response.dto';
+import { ApiCommonErrors } from '../common/api-common-errors.decorator';
 
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
@@ -40,6 +41,7 @@ export class AuthController {
   })
   @ApiBody({ type: RegisterRequestDto })
   @ApiResponse({ status: 201, type: UserResponseDto })
+  @ApiCommonErrors(400, 409)
   @ZodSerializerDto(UserResponseDto)
   @Post('register')
   register(@Body() body: RegisterRequestDto): Promise<UserResponseDto> {
@@ -50,7 +52,8 @@ export class AuthController {
     summary: 'Авторизация на сервисе',
   })
   @ApiBody({ type: LoginRequestDto })
-  @ApiResponse({ type: AccessTokenResponseDto })
+  @ApiResponse({ status: 200, type: AccessTokenResponseDto })
+  @ApiCommonErrors(400, 401)
   @ZodSerializerDto(AccessTokenResponseDto)
   @Post('login')
   async login(
@@ -86,7 +89,8 @@ export class AuthController {
     summary: 'Выход из аккаунта',
     description: 'Удаление refresh токена из базы, отчистка cookie',
   })
-  @ApiResponse({ type: LogoutResponseDto })
+  @ApiResponse({ status: 200, type: LogoutResponseDto })
+  @ApiCommonErrors(400, 401)
   @UseGuards(RefreshTokenGuard)
   @ZodSerializerDto(LogoutResponseDto)
   @Post('logout')
@@ -116,7 +120,8 @@ export class AuthController {
     summary: 'Обновление access токена по refresh токену из cookie',
   })
   @ApiBody({ type: RefreshTokenRequestDto })
-  @ApiResponse({ type: AccessTokenResponseDto })
+  @ApiResponse({ status: 200, type: AccessTokenResponseDto })
+  @ApiCommonErrors(401)
   @UseGuards(RefreshTokenGuard)
   @ZodSerializerDto(AccessTokenResponseDto)
   @Post('refresh')

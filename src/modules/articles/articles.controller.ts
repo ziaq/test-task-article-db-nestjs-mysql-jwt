@@ -23,6 +23,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { UserId } from '../common/user-id.decorator';
+import { ApiCommonErrors } from '../common/api-common-errors.decorator';
 
 import { ArticleIdParamDto } from './dto/article-id-param.dto';
 import { ArticleResponseDto } from './dto/article-response.dto';
@@ -46,7 +47,8 @@ export class ArticlesController {
   @ApiQuery({ name: 'limit', required: true, type: Number })
   @ApiQuery({ name: 'offset', required: true, type: Number })
   @ApiQuery({ name: 'sort', required: true, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ type: GetArticlesResponseDto, isArray: true })
+  @ApiResponse({ status: 200, type: GetArticlesResponseDto, isArray: true })
+  @ApiCommonErrors(400)
   @ZodSerializerDto(GetArticlesResponseDto)
   @Get()
   getAll(
@@ -63,7 +65,8 @@ export class ArticlesController {
       'Возвращает публичную статью для неавторизованных пользователей. Если передан access token, то можно получить любую статью, в том числе с isPublic: false',
   })
   @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({ type: ArticleResponseDto })
+  @ApiResponse({ status: 200, type: ArticleResponseDto })
+  @ApiCommonErrors(400, 401, 404)
   @ZodSerializerDto(ArticleResponseDto)
   @Get(':id')
   getById(
@@ -78,7 +81,8 @@ export class ArticlesController {
     summary: 'Добавление новой статьи',
   })
   @ApiBody({ type: CreateArticleRequestDto })
-  @ApiResponse({ type: ArticleResponseDto, status: 201 })
+  @ApiResponse({ status: 201, type: ArticleResponseDto})
+  @ApiCommonErrors(400, 401)
   @UseGuards(AccessTokenGuard)
   @ZodSerializerDto(ArticleResponseDto)
   @Post()
@@ -95,7 +99,8 @@ export class ArticlesController {
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateArticleRequestDto })
-  @ApiResponse({ type: ArticleResponseDto })
+  @ApiResponse({ status: 200, type: ArticleResponseDto })
+  @ApiCommonErrors(400, 401, 404)
   @UseGuards(AccessTokenGuard)
   @ZodSerializerDto(ArticleResponseDto)
   @Patch(':id')
@@ -112,6 +117,7 @@ export class ArticlesController {
     summary: 'Удаление статьи',
   })
   @ApiParam({ name: 'id', type: Number })
+  @ApiCommonErrors(400, 401, 404)
   @HttpCode(204)
   @UseGuards(AccessTokenGuard)
   @Delete(':id')
