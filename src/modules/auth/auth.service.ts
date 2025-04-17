@@ -9,7 +9,6 @@ import { Config } from '../../config/config.types';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
-import { mapToUserResponseDto } from '../users/utils/map-to-user-response-dto';
 
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { RefreshSession } from './entities/refresh-session.entity';
@@ -31,12 +30,12 @@ export class AuthService {
 
   async registerUser(data: RegisterRequestDto): Promise<UserResponseDto> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = await this.usersService.create({
+    const userResponseDto = await this.usersService.createUser({
       ...data,
       password: hashedPassword,
     });
 
-    return user;
+    return userResponseDto;
   }
 
   async generateTokens(
@@ -127,10 +126,10 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.usersService.findByEmail(email);
-    if (!user) return null;
+    const userWithPassword = await this.usersService.getUserWithPassword(email);
+    if (!userWithPassword) return null;
 
-    const match = await bcrypt.compare(password, user.password);
-    return match ? user : null;
+    const match = await bcrypt.compare(password, userWithPassword.password);
+    return match ? userWithPassword : null;
   }
 }

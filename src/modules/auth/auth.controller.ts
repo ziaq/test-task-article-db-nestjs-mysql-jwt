@@ -56,11 +56,11 @@ export class AuthController {
   ): Promise<AccessTokenResponseDto> {
     const { email, password, fingerprint } = body;
 
-    const user = await this.authService.validateUser(email, password);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const userWithPassword = await this.authService.validateUser(email, password);
+    if (!userWithPassword) throw new UnauthorizedException('Invalid credentials');
 
     const { accessToken, refreshToken } = await this.authService.generateTokens(
-      user.id,
+      userWithPassword.id,
       fingerprint,
     );
 

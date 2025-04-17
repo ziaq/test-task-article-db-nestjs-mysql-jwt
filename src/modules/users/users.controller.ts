@@ -25,6 +25,6 @@ export class UsersController {
   @ApiResponse({ type: UserResponseDto })
   @Get('my-profile')
   getProfile(@UserId() userId: number) {
-    return this.usersService.findById(userId);
+    return this.usersService.getUserById(userId);
   }
 }

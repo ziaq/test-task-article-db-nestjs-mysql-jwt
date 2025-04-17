@@ -9,22 +9,23 @@ import { Repository } from 'typeorm';
 import { CreateUserRequestDto } from './dto/create-user-request.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { User } from './entities/user.entity';
+import { mapToUserResponseDto } from './utils/map-to-user-response-dto';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
-  async create(data: CreateUserRequestDto): Promise<UserResponseDto> {
-    const existingUser = await this.findByEmail(data.email);
+  async createUser(data: CreateUserRequestDto): Promise<UserResponseDto> {
+    const existingUser = await this.getUserWithPassword(data.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
     const user = await this.userRepo.save(data);
-    return user;
+    return mapToUserResponseDto(user);
   }
 
-  async findById(id: number): Promise<UserResponseDto> {
+  async getUserById(id: number): Promise<UserResponseDto> {
     const user = await this.userRepo.findOne({
       where: { id },
       select: {
@@ -36,10 +37,10 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('User not found');
 
-    return user;
+    return mapToUserResponseDto(user);
   }
 
-  findByEmail(email: string): Promise<User | null> {
+  getUserWithPassword(email: string): Promise<User | null> {
     return this.userRepo.findOne({ where: { email } });
   }
 }
