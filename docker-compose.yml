@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.3
-    container_name: mysql
     restart: unless-stopped
     env_file:
       - .env
@@ -13,9 +10,32 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - '${DB_PORT}:3306'
+      - "${DB_PORT}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      WAIT_HOSTS: mysql:3306
+
+  migration:
+    build: .
+    profiles: ["migration"]
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    environment:
+      WAIT_HOSTS: mysql:3306
+      WAIT_COMMAND: "npm run migration:run"
+    entrypoint: ["/wait"]
 
 volumes:
   mysql_data:
