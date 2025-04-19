@@ -18,7 +18,7 @@ import { Response } from 'express';
 import { ZodSerializerDto } from 'nestjs-zod';
 
 import { UserId } from '../common/user-id.decorator';
-import { UserResponseDto } from '../users/dto/user-response.dto';
+import { MyProfileResponseDto } from '../users/dto/my-profile-response.dto';
 import { ApiCommonErrors } from '../common/api-common-errors.decorator';
 
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
@@ -40,11 +40,11 @@ export class AuthController {
     summary: 'Регистрация нового пользователя',
   })
   @ApiBody({ type: RegisterRequestDto })
-  @ApiResponse({ status: 201, type: UserResponseDto })
+  @ApiResponse({ status: 201, type: MyProfileResponseDto })
   @ApiCommonErrors(400, 409)
-  @ZodSerializerDto(UserResponseDto)
+  @ZodSerializerDto(MyProfileResponseDto)
   @Post('register')
-  register(@Body() body: RegisterRequestDto): Promise<UserResponseDto> {
+  register(@Body() body: RegisterRequestDto): Promise<MyProfileResponseDto> {
     return this.authService.registerUser(body);
   }
 

@@ -6,6 +6,7 @@ export const getArticlesRequestQuerySchema = z
     limit: z.coerce.number().int().min(1).max(100),
     offset: z.coerce.number().int().min(0),
     sort: z.enum(['ASC', 'DESC']),
+    tag: z.string().min(1).optional(),
   })
   .strict();
 

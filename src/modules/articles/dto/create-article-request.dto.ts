@@ -5,7 +5,7 @@ const createArticleRequestSchema = z
   .object({
     title: z.string().min(1).max(255),
     content: z.string().min(1).max(10_000),
-    tags: z.array(z.string().min(1).max(50)).min(1).nullable(),
+    tags: z.array(z.string().min(1).max(50)),
     isPublic: z.boolean(),
   })
   .strict();

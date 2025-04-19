@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateUserRequestDto } from './dto/create-user-request.dto';
-import { UserResponseDto } from './dto/user-response.dto';
+import { MyProfileResponseDto } from './dto/my-profile-response.dto';
 import { User } from './entities/user.entity';
 import { mapToUserResponseDto } from './utils/map-to-user-response-dto';
 
@@ -15,7 +15,7 @@ import { mapToUserResponseDto } from './utils/map-to-user-response-dto';
 export class UsersService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
-  async createUser(data: CreateUserRequestDto): Promise<UserResponseDto> {
+  async createUser(data: CreateUserRequestDto): Promise<MyProfileResponseDto> {
     const existingUser = await this.getUserWithPassword(data.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
@@ -25,7 +25,7 @@ export class UsersService {
     return mapToUserResponseDto(user);
   }
 
-  async getUserById(id: number): Promise<UserResponseDto> {
+  async getUserById(id: number): Promise<MyProfileResponseDto> {
     const user = await this.userRepo.findOne({
       where: { id },
       select: {

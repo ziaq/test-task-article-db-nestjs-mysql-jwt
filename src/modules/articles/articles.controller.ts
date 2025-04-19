@@ -24,6 +24,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { UserId } from '../common/user-id.decorator';
 import { ApiCommonErrors } from '../common/api-common-errors.decorator';
+import { OptionalAuthGuard } from '../auth/guards/optional-access-token.guard';
 
 import { ArticleIdParamDto } from './dto/article-id-param.dto';
 import { ArticleResponseDto } from './dto/article-response.dto';
@@ -47,9 +48,10 @@ export class ArticlesController {
   @ApiQuery({ name: 'limit', required: true, type: Number })
   @ApiQuery({ name: 'offset', required: true, type: Number })
   @ApiQuery({ name: 'sort', required: true, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ status: 200, type: GetArticlesResponseDto, isArray: true })
+  @ApiQuery({ name: 'tag', required: false, type: String })
+  @ApiResponse({ status: 200, type: GetArticlesResponseDto })
   @ApiCommonErrors(400)
-  @ZodSerializerDto(GetArticlesResponseDto)
+  @UseGuards(OptionalAuthGuard)
   @Get()
   getAll(
     @Query() query: GetArticlesRequestQueryDto,
@@ -66,7 +68,8 @@ export class ArticlesController {
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, type: ArticleResponseDto })
-  @ApiCommonErrors(400, 401, 404)
+  @ApiCommonErrors(400, 403, 404)
+  @UseGuards(OptionalAuthGuard)
   @ZodSerializerDto(ArticleResponseDto)
   @Get(':id')
   getById(

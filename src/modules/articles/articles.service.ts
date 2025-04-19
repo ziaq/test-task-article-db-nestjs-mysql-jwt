@@ -11,6 +11,9 @@ import { GetArticlesRequestQueryDto } from './dto/get-articles-request-query.dto
 import { UpdateArticleRequestDto } from './dto/update-article-request.dto';
 import { Article } from './entities/article.entity';
 import { ArticleUpdateLog } from './entities/article-update-log.entity';
+import { mapToArticleResponseDto } from './utils/map-to-article-response.dto';
+import { ArticleResponseDto } from './dto/article-response.dto';
+import { Tag } from './entities/tag.entity';
 
 @Injectable()
 export class ArticlesService {
@@ -18,72 +21,138 @@ export class ArticlesService {
     @InjectRepository(Article)
     private articleRepo: Repository<Article>,
 
+    @InjectRepository(Tag)
+    private tagRepo: Repository<Tag>,
+
     @InjectRepository(ArticleUpdateLog)
     private updateLogRepo: Repository<ArticleUpdateLog>,
   ) {}
 
-  async findById(id: number, userId?: number): Promise<Article> {
-    const article = await this.articleRepo.findOne({ where: { id } });
-
+  async findById(id: number, userId?: number): Promise<ArticleResponseDto> {
+    const article = await this.articleRepo.findOne({
+      where: { id },
+      relations: ['tags', 'createdByUser'],
+    });
+  
     if (!article) throw new NotFoundException('Article not found');
-
+  
     if (!userId && !article.isPublic) {
       throw new ForbiddenException('Access denied to private article');
     }
-
-    return article;
+  
+    return mapToArticleResponseDto(article);
   }
 
   async findAll(
     query: GetArticlesRequestQueryDto,
     userId?: number,
-  ): Promise<Article[]> {
-    const { sort, offset, limit } = query;
-
-    const whereCondition = userId ? {} : { isPublic: true };
-
-    return this.articleRepo.find({
-      where: whereCondition,
-      order: { createdAt: sort },
-      skip: offset,
-      take: limit,
-    });
+  ): Promise<ArticleResponseDto[]> {
+    const { sort, offset, limit, tag } = query;
+  
+    const qb = this.articleRepo
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.createdByUser', 'user')
+      .leftJoinAndSelect('article.tags', 'tag')
+      .orderBy('article.createdAt', sort)
+      .skip(offset)
+      .take(limit);
+  
+    if (!userId) {
+      qb.where('article.isPublic = true');
+    }
+  
+    if (tag) {
+      qb.andWhere('tag.name = :tag', { tag });
+    }
+  
+    const articles = await qb.getMany();
+      
+    return articles.map(mapToArticleResponseDto);
   }
 
-  async create(userId: number, dto: CreateArticleRequestDto): Promise<Article> {
+  async create(
+    userId: number, 
+    dto: CreateArticleRequestDto
+  ): Promise<ArticleResponseDto> {
+    const tags: Tag[] = [];
+  
+    for (const tagName of dto.tags) {
+      let tag = await this.tagRepo.findOne({ where: { name: tagName } });
+  
+      if (!tag) {
+        tag = this.tagRepo.create({ name: tagName });
+        await this.tagRepo.save(tag);
+      }
+  
+      tags.push(tag);
+    }
+  
     const article = this.articleRepo.create({
       title: dto.title,
       content: dto.content,
-      tags: dto.tags,
+      tags,
       isPublic: dto.isPublic,
-      user: { id: userId },
+      createdByUser: { id: userId },
     });
+  
+    const savedArticle = await this.articleRepo.save(article);
 
-    return this.articleRepo.save(article);
+    const articleWithRelations = await this.articleRepo.findOneOrFail({
+      where: { id: savedArticle.id },
+      relations: ['tags', 'createdByUser'],
+    });
+  
+    return mapToArticleResponseDto(articleWithRelations);
   }
 
   async update(
     userId: number,
     id: number,
     dto: UpdateArticleRequestDto,
-  ): Promise<Article> {
-    const article = await this.articleRepo.findOne({ where: { id } });
+  ): Promise<ArticleResponseDto> {
+    const article = await this.articleRepo.findOne({
+      where: { id },
+      relations: ['tags'],
+    });
+  
     if (!article) throw new NotFoundException('Article not found');
-
+  
     if (dto.title !== undefined) article.title = dto.title;
     if (dto.content !== undefined) article.content = dto.content;
-    if (dto.tags !== undefined) article.tags = dto.tags ?? [];
     if (dto.isPublic !== undefined) article.isPublic = dto.isPublic;
 
-    const updatedArticle = await this.articleRepo.save(article);
-
+    if (dto.tags !== undefined) {
+      const tags: Tag[] = [];
+  
+      for (const tagName of dto.tags) {
+        let tag = await this.tagRepo.findOne({ where: { name: tagName } });
+  
+        if (!tag) {
+          tag = this.tagRepo.create({ name: tagName });
+          await this.tagRepo.save(tag);
+        }
+  
+        tags.push(tag);
+      }
+  
+      article.tags = tags;
+    }
+  
+    const savedArticle = await this.articleRepo.save(article);
+  
     await this.updateLogRepo.save({
       article: { id },
       updatedBy: { id: userId },
     });
-
-    return updatedArticle;
+  
+    const articleWithRelations = await this.articleRepo.findOneOrFail({
+      where: { id: savedArticle.id },
+      relations: ['tags', 'createdByUser'],
+    });
+  
+    return mapToArticleResponseDto(articleWithRelations);
   }
+  
 
   async delete(id: number): Promise<void> {
     const article = await this.articleRepo.findOne({ where: { id } });

@@ -5,7 +5,7 @@ export const updateArticleRequestSchema = z
   .object({
     title: z.string().min(1).max(255).optional(),
     content: z.string().min(1).max(10_000).optional(),
-    tags: z.array(z.string().min(1).max(50)).min(1).nullable().optional(),
+    tags: z.array(z.string().min(1).max(50)).optional(),
     isPublic: z.boolean().optional(),
   })
   .strict();

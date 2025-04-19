@@ -11,7 +11,7 @@ import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { UserId } from '../common/user-id.decorator';
 import { ApiCommonErrors } from '../common/api-common-errors.decorator';
 
-import { UserResponseDto } from './dto/user-response.dto';
+import { MyProfileResponseDto } from './dto/my-profile-response.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('Users')
@@ -24,9 +24,9 @@ export class UsersController {
   @ApiOperation({
     summary: 'Получение данных пользователя на основе его access токена',
   })
-  @ApiResponse({ status: 200, type: UserResponseDto })
+  @ApiResponse({ status: 200, type: MyProfileResponseDto })
   @ApiCommonErrors(401)
-  @ZodSerializerDto(UserResponseDto)
+  @ZodSerializerDto(MyProfileResponseDto)
   @Get('my-profile')
   getProfile(@UserId() userId: number) {
     return this.usersService.getUserById(userId);

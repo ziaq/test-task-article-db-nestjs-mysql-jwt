@@ -1,7 +1,7 @@
-import { UserResponseDto } from '../dto/user-response.dto';
+import { MyProfileResponseDto } from '../dto/my-profile-response.dto';
 import { User } from '../entities/user.entity';
 
-export function mapToUserResponseDto(user: User): UserResponseDto {
+export function mapToUserResponseDto(user: User): MyProfileResponseDto {
   return {
     id: user.id,
     email: user.email,

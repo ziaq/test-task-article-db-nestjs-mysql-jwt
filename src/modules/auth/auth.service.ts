@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 
 import { AppConfigService } from '../../config/app-config.service';
 import { Config } from '../../config/config.types';
-import { UserResponseDto } from '../users/dto/user-response.dto';
+import { MyProfileResponseDto } from '../users/dto/my-profile-response.dto';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 
@@ -28,14 +28,14 @@ export class AuthService {
     this.config = appConfigService.getConfig();
   }
 
-  async registerUser(data: RegisterRequestDto): Promise<UserResponseDto> {
+  async registerUser(data: RegisterRequestDto): Promise<MyProfileResponseDto> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const userResponseDto = await this.usersService.createUser({
+    const MyProfileResponseDto = await this.usersService.createUser({
       ...data,
       password: hashedPassword,
     });
 
-    return userResponseDto;
+    return MyProfileResponseDto;
   }
 
   async generateTokens(

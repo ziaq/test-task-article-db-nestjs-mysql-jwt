@@ -1,12 +1,15 @@
 import {
+  Entity,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
+  JoinColumn,
 } from 'typeorm';
-
 import { User } from '../../users/entities/user.entity';
+import { Tag } from './tag.entity';
 
 @Entity('articles')
 export class Article {
@@ -22,12 +25,14 @@ export class Article {
   @Column({ type: 'boolean', default: false })
   isPublic: boolean;
 
-  @Column({ type: 'simple-array', nullable: true })
-  tags: string[] | null;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
-  user: User;
+  @JoinColumn({ name: 'createdByUserId' })
+  createdByUser: User;
+
+  @ManyToMany(() => Tag, { cascade: true })
+  @JoinTable()
+  tags: Tag[];
 }
