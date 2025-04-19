@@ -25,17 +25,5 @@ services:
     environment:
       WAIT_HOSTS: mysql:3306
 
-  migration:
-    build: .
-    profiles: ["migration"]
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-    environment:
-      WAIT_HOSTS: mysql:3306
-      WAIT_COMMAND: "npm run migration:run"
-    entrypoint: ["/wait"]
-
 volumes:
   mysql_data:

@@ -55,23 +55,13 @@ JWT_REFRESH_SECRET=even_more_secret_refresh_token_key_456!@#
 
 #### 3. Запустить проект через Docker-compose
 
-##### 3.1 Первый запуск (с применением миграций)
+##### 3.1 Первый запуск (сборка, применение миграций, запуск)
 
 ```bash
-# Собрать Docker-образ
-docker compose build
-
-# Поднять базу данных
-docker compose up -d mysql
-
-# Применить миграции
-docker compose run --rm migration
-
-# Запустить приложение
-docker compose up
+docker compose build && docker compose up -d mysql && docker compose run --rm app bash -c "/wait && npm run migration:run" && docker compose up
 ```
 
-##### 3.2 Повторный запуск (без миграций)
+##### 3.2 Повторный запуск (без сборки и миграций)
 
 ```bash
 docker compose up
